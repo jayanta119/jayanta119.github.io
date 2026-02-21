@@ -187,7 +187,7 @@ h1 {
   </div>
 
   <a href="https://sharkcool.in" class="btn" target="_blank">Visit Main Site →</a>
-  <a href="telegram-chat.html" class="btn btn-ghost">Chat Widget Demo</a>
+  <a href="https://github.com/jayanta119/telegram-chat-widget" class="btn btn-ghost" target="_blank">View on GitHub</a>
 
   <div class="divider"></div>
 
@@ -215,5 +215,355 @@ h1 {
   </div>
 </div>
 
+<!-- ── CHAT WIDGET ───────────────────────────────────────── -->
+<style>
+#chat-fab {
+  position: fixed; bottom: calc(28px + env(safe-area-inset-bottom,0px)); right: calc(28px + env(safe-area-inset-right,0px));
+  width: 62px; height: 62px; border-radius: 50%;
+  background: linear-gradient(135deg,#1da1f2,#667eea);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; z-index: 9999;
+  box-shadow: 0 6px 28px rgba(29,161,242,0.45), 0 2px 8px rgba(0,0,0,0.3);
+  border: none; outline: none;
+  transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+#chat-fab:hover { transform: scale(1.1); }
+#chat-fab:active { transform: scale(0.92); }
+#chat-fab::before {
+  content: ''; position: absolute; width: 100%; height: 100%;
+  border-radius: 50%; background: rgba(29,161,242,0.3);
+  animation: w-pulse 2.2s ease-out infinite;
+}
+@keyframes w-pulse { 0%{transform:scale(1);opacity:.8} 70%,100%{transform:scale(1.6);opacity:0} }
+#chat-fab .fi { width:26px;height:26px;transition:opacity .2s,transform .2s;fill:white; }
+#chat-fab .fi.hidden{opacity:0;transform:rotate(45deg) scale(0.5);position:absolute;}
+#chat-fab .fi.visible{opacity:1;transform:rotate(0) scale(1);}
+.w-ndot{position:absolute;top:4px;right:4px;width:14px;height:14px;background:#ff4757;border-radius:50%;border:2px solid white;display:none;}
+
+#w-panel {
+  position:fixed; bottom:calc(104px + env(safe-area-inset-bottom,0px)); right:calc(28px + env(safe-area-inset-right,0px));
+  width:380px; max-width:calc(100vw - 40px);
+  height:560px; max-height:calc(100vh - 140px);
+  background:#f7f9fc; border:1px solid #e2e8f0;
+  border-radius:20px; z-index:9998; overflow:hidden;
+  display:flex; flex-direction:column;
+  box-shadow:0 20px 60px rgba(0,0,0,0.15);
+  transform:scale(0.85) translateY(20px); transform-origin:bottom right;
+  opacity:0; pointer-events:none;
+  transition:transform 0.3s cubic-bezier(.34,1.56,.64,1), opacity 0.25s ease;
+}
+#w-panel::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(29,161,242,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(102,126,234,0.06) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+#w-panel.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all;}
+
+.w-intro{position:absolute;inset:0;z-index:50;background:#f7f9fc;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
+.w-icard{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:28px 24px;width:100%;box-shadow:0 0 40px rgba(29,161,242,0.08);position:relative;}
+.w-icard::before{content:'';position:absolute;top:0;left:30px;right:30px;height:1px;background:linear-gradient(90deg,transparent,#1da1f2,#667eea,transparent);}
+.w-icard h2{font-size:18px;font-weight:800;background:linear-gradient(135deg,#1da1f2,#667eea);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;font-family:'Syne',sans-serif;}
+.w-icard p{font-family:'DM Mono',monospace;font-size:11px;color:#94a3b8;margin-bottom:20px;line-height:1.6;}
+.w-field{margin-bottom:12px;}
+.w-field label{display:block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#94a3b8;margin-bottom:5px;}
+.w-field input{width:100%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;color:#1e293b;font-family:'DM Mono',monospace;font-size:16px;outline:none;transition:border-color .2s;-webkit-appearance:none;}
+.w-field input:focus{border-color:rgba(29,161,242,0.5);}
+.w-sbtn{width:100%;padding:13px;margin-top:6px;background:linear-gradient(135deg,#1da1f2,#667eea);border:none;border-radius:12px;color:#fff;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;min-height:48px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.w-sbtn:active{transform:scale(0.97);}
+
+.w-header{position:relative;z-index:10;background:#fff;border-bottom:1px solid #e2e8f0;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.w-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#1da1f2,#667eea,transparent);opacity:.4;}
+.w-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#1da1f2,#667eea);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;position:relative;}
+.w-odot{position:absolute;bottom:1px;right:1px;width:10px;height:10px;border-radius:50%;background:#22c55e;border:2px solid #fff;box-shadow:0 0 6px #22c55e;}
+.w-hinfo{flex:1;min-width:0;}
+.w-hinfo h2{font-size:14px;font-weight:800;background:linear-gradient(135deg,#1da1f2,#667eea);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-family:'Syne',sans-serif;}
+.w-hsub{font-family:'DM Mono',monospace;font-size:10px;color:#94a3b8;margin-top:1px;}
+.w-utag{font-family:'DM Mono',monospace;font-size:9px;color:#94a3b8;background:#f0f4f8;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;white-space:nowrap;flex-shrink:0;}
+.w-cbtn{width:34px;height:34px;border-radius:50%;background:#f0f4f8;border:1px solid #e2e8f0;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:14px;flex-shrink:0;-webkit-tap-highlight-color:transparent;}
+.w-cbtn:active{background:#e2e8f0;}
+
+.w-msgs-wrap{flex:1;overflow:hidden;position:relative;z-index:1;}
+.w-msgs{height:100%;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+.w-msgs::-webkit-scrollbar{width:3px;}
+.w-msgs::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:4px;}
+.w-msg{display:flex;flex-direction:column;max-width:82%;animation:w-msgin .25s cubic-bezier(0.16,1,0.3,1) forwards;opacity:0;transform:translateY(8px);}
+@keyframes w-msgin{to{opacity:1;transform:translateY(0);}}
+.w-msg.out{align-self:flex-end;align-items:flex-end;}
+.w-msg.inc{align-self:flex-start;align-items:flex-start;}
+.w-msender{font-family:'DM Mono',monospace;font-size:9px;color:#94a3b8;margin-bottom:3px;}
+.w-mbub{padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.55;word-break:break-word;font-family:'Syne',sans-serif;}
+.w-msg.out .w-mbub{background:linear-gradient(135deg,#1da1f2,#667eea);border-bottom-right-radius:4px;color:#fff;box-shadow:0 4px 16px rgba(29,161,242,.2);}
+.w-msg.inc .w-mbub{background:#f0f4f8;border:1px solid #e2e8f0;border-bottom-left-radius:4px;color:#1e293b;}
+.w-mtime{font-family:'DM Mono',monospace;font-size:9px;color:#94a3b8;margin-top:3px;}
+.w-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#94a3b8;}
+.w-empty .icon{font-size:30px;opacity:.2;}
+.w-empty p{font-family:'DM Mono',monospace;font-size:10px;}
+.w-typing{display:none;align-self:flex-start;background:#f0f4f8;border:1px solid #e2e8f0;border-radius:16px;border-bottom-left-radius:4px;padding:12px 14px;gap:5px;align-items:center;}
+.w-typing.show{display:flex;}
+.w-typing span{width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:w-bounce 1.2s infinite;}
+.w-typing span:nth-child(2){animation-delay:.2s;}
+.w-typing span:nth-child(3){animation-delay:.4s;}
+@keyframes w-bounce{0%,60%,100%{transform:translateY(0);opacity:.4;}30%{transform:translateY(-5px);opacity:1;}}
+
+.w-input-area{position:relative;z-index:10;background:#fff;border-top:1px solid #e2e8f0;padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px));flex-shrink:0;}
+.w-irow{display:flex;align-items:flex-end;gap:6px;background:#f0f4f8;border:1px solid #e2e8f0;border-radius:16px;padding:6px 6px 6px 14px;transition:border-color .2s;}
+.w-irow:focus-within{border-color:rgba(29,161,242,.4);}
+textarea#wInput{flex:1;background:none;border:none;outline:none;color:#1e293b;font-family:'DM Mono',monospace;font-size:15px;line-height:1.5;resize:none;max-height:100px;min-height:26px;height:26px;padding:4px 0;-webkit-appearance:none;}
+textarea#wInput::placeholder{color:#94a3b8;}
+.w-sndbtn{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#1da1f2,#667eea);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 10px rgba(29,161,242,.3);-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.w-sndbtn:active{transform:scale(0.9);}
+.w-sndbtn:disabled{opacity:.4;}
+.w-sndbtn svg{width:17px;height:17px;fill:white;}
+#wImgBtn{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 12px rgba(34,197,94,.4);-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+#wImgBtn:active{transform:scale(0.9);}
+#wImgBtn svg{width:17px;height:17px;stroke:#fff;}
+#wVoiceBtn{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#f97316,#ef4444);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 12px rgba(249,115,22,.4);-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+#wVoiceBtn:active{transform:scale(0.9);}
+#wVoiceBtn svg{width:17px;height:17px;stroke:#fff;}
+#wVoiceBtn.recording{background:linear-gradient(135deg,#ef4444,#dc2626)!important;animation:w-recpulse .8s ease infinite;}
+@keyframes w-recpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.w-hint{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:#cbd5e1;margin-top:5px;}
+.w-mbub img{max-width:200px;border-radius:10px;display:block;margin-top:4px;cursor:pointer;}
+.w-mbub audio{margin-top:4px;width:180px;}
+.w-toast{position:fixed;top:12px;left:50%;transform:translateX(-50%) translateY(-80px);background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 20px;font-family:'DM Mono',monospace;font-size:12px;z-index:99999;transition:transform .35s cubic-bezier(0.16,1,0.3,1);white-space:nowrap;max-width:calc(100vw - 32px);}
+.w-toast.show{transform:translateX(-50%) translateY(0);}
+.w-toast.error{border-color:rgba(255,82,82,.4);color:#ef4444;}
+
+@media(max-width:520px){
+  #w-panel{position:fixed;inset:0;width:100%;height:100%;max-width:100%;max-height:100%;border-radius:0;border:none;transform:translateY(100%);transform-origin:bottom center;transition:transform .35s cubic-bezier(0.22,1,0.36,1),opacity .2s;}
+  #w-panel.open{transform:translateY(0);}
+  .w-header{padding-top:calc(13px + env(safe-area-inset-top,0px));}
+  .w-msg{max-width:88%;}
+  .w-utag{display:none;}
+}
+</style>
+
+<!-- FAB -->
+<button id="chat-fab" onclick="wToggle()">
+  <svg class="fi visible" id="w-ico-open" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  <svg class="fi hidden" id="w-ico-close" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg>
+  <span class="w-ndot" id="wNotif"></span>
+</button>
+
+<!-- PANEL -->
+<div id="w-panel">
+  <div class="w-intro" id="wIntro">
+    <div class="w-icard">
+      <div style="font-size:28px;margin-bottom:10px;">❄️</div>
+      <h2>Support</h2>
+      <p>Tell us your name and we'll connect you instantly.</p>
+      <div class="w-field"><label>Your Name *</label><input type="text" id="wName" placeholder="e.g. Rahul Sharma" maxlength="40" autocomplete="name" autocapitalize="words"/></div>
+      <div class="w-field"><label>Phone (optional)</label><input type="tel" id="wPhone" placeholder="e.g. 98765 43210" maxlength="15" autocomplete="tel" inputmode="tel"/></div>
+      <button class="w-sbtn" onclick="wStart()">Start Chat →</button>
+    </div>
+  </div>
+  <div class="w-header">
+    <div class="w-av">❄️<div class="w-odot"></div></div>
+    <div class="w-hinfo"><h2>Support</h2><div class="w-hsub" id="wHsub">Connecting...</div></div>
+    <div class="w-utag" id="wTag"></div>
+    <button class="w-cbtn" onclick="wToggle()">✕</button>
+  </div>
+  <div class="w-msgs-wrap"><div class="w-msgs" id="wMsgs">
+    <div class="w-empty" id="wEmpty"><div class="icon">💬</div><p>Send a message to get started!</p></div>
+    <div class="w-typing" id="wTyping"><span></span><span></span><span></span></div>
+  </div></div>
+  <div class="w-input-area">
+    <div class="w-irow">
+      <input type="file" id="wImgFile" accept="image/*" style="display:none" onchange="wSendImg(this)">
+      <button id="wImgBtn" onclick="document.getElementById('wImgFile').click()" title="Send image">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </button>
+      <button id="wVoiceBtn" title="Hold to record">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
+      <textarea id="wInput" placeholder="Type a message..." rows="1" autocomplete="off" autocorrect="on" autocapitalize="sentences"></textarea>
+      <button class="w-sndbtn" id="wSendBtn" onclick="wSend()">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <div class="w-hint" id="wHint">Enter to send · Hold 🎤 to record</div>
+  </div>
+</div>
+<div class="w-toast" id="wToast"></div>
+
+<script>
+const W_API = 'https://sharkcool.in/tg-messages-api.php';
+let wSID='',wName='',wPhone='',wLast=0,wIds=new Set(),wPoll,wOpen=false;
+const isMob=()=>window.innerWidth<=520;
+
+function wToggle(){
+  wOpen=!wOpen;
+  document.getElementById('w-panel').classList.toggle('open',wOpen);
+  document.body.classList.toggle('w-chat-open',wOpen);
+  document.getElementById('w-ico-open').classList.toggle('visible',!wOpen);
+  document.getElementById('w-ico-open').classList.toggle('hidden',wOpen);
+  document.getElementById('w-ico-close').classList.toggle('visible',wOpen);
+  document.getElementById('w-ico-close').classList.toggle('hidden',!wOpen);
+  if(wOpen){
+    document.getElementById('wNotif').style.display='none';
+    if(isMob()) document.body.style.overflow='hidden';
+    setTimeout(()=>{const el=document.querySelector('#wIntro input,#wInput');if(el)el.focus();},380);
+  } else {
+    if(isMob()) document.body.style.overflow='';
+    if(document.activeElement) document.activeElement.blur();
+  }
+}
+
+function wGenSID(){return Math.random().toString(36).substr(2,6).toUpperCase();}
+
+function wStart(){
+  const n=document.getElementById('wName').value.trim();
+  if(!n){document.getElementById('wName').style.borderColor='#ef4444';setTimeout(()=>document.getElementById('wName').style.borderColor='',1200);return;}
+  wName=n; wPhone=document.getElementById('wPhone').value.trim();
+  wSID=localStorage.getItem('tg_session')||wGenSID();
+  localStorage.setItem('tg_session',wSID);
+  localStorage.setItem('tg_name',wName);
+  localStorage.setItem('tg_phone',wPhone);
+  document.getElementById('wIntro').style.display='none';
+  document.getElementById('wHsub').innerHTML=`<span style="color:#22c55e">●</span> Online · ${wName}`;
+  document.getElementById('wTag').textContent=`#${wSID}`;
+  wInit();
+  setTimeout(()=>document.getElementById('wInput').focus(),300);
+}
+
+window.addEventListener('load',()=>{
+  const s=localStorage.getItem('tg_session'),n=localStorage.getItem('tg_name');
+  if(s&&n){
+    wSID=s;wName=n;wPhone=localStorage.getItem('tg_phone')||'';
+    document.getElementById('wIntro').style.display='none';
+    document.getElementById('wHsub').innerHTML=`<span style="color:#22c55e">●</span> Online · ${wName}`;
+    document.getElementById('wTag').textContent=`#${wSID}`;
+    wInit();
+  }
+  document.getElementById('wName').addEventListener('keydown',e=>{if(e.key==='Enter')wStart();});
+  document.getElementById('wPhone').addEventListener('keydown',e=>{if(e.key==='Enter')wStart();});
+  setTimeout(()=>{if(!wOpen)document.getElementById('wNotif').style.display='block';},3000);
+
+  const vb=document.getElementById('wVoiceBtn');
+  vb.addEventListener('mousedown',e=>{e.preventDefault();wRecStart();});
+  vb.addEventListener('mouseup',e=>{e.preventDefault();wRecStop();});
+  vb.addEventListener('mouseleave',e=>{if(wRec)wRecStop();});
+  vb.addEventListener('touchstart',e=>{e.preventDefault();wRecStart();},{passive:false});
+  vb.addEventListener('touchend',e=>{e.preventDefault();wRecStop();},{passive:false});
+  vb.addEventListener('touchcancel',e=>{if(wRec)wRecStop();},{passive:false});
+
+  if('visualViewport' in window) window.visualViewport.addEventListener('resize',()=>{
+    if(isMob()&&wOpen){
+      const p=document.getElementById('w-panel');
+      p.style.height=window.visualViewport.height+'px';
+      p.style.top='0';p.style.bottom='';
+      document.getElementById('wMsgs').scrollTop=99999;
+    }
+  });
+});
+
+const wTa=document.getElementById('wInput');
+wTa.addEventListener('input',()=>{wTa.style.height='auto';wTa.style.height=Math.min(wTa.scrollHeight,100)+'px';});
+wTa.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!isMob()){e.preventDefault();wSend();}});
+
+async function wSend(){
+  const msg=wTa.value.trim();if(!msg||!wSID)return;
+  document.getElementById('wSendBtn').disabled=true;
+  wTa.value='';wTa.style.height='auto';
+  const tid='tmp_'+Date.now();wIds.add(tid);
+  wAppend({id:tid,text:msg,from:wName,direction:'outgoing',timestamp:Math.floor(Date.now()/1000)});
+  try{
+    const fd=new FormData();fd.append('action','send');fd.append('msg',msg);fd.append('session',wSID);fd.append('name',wName);fd.append('phone',wPhone);
+    const r=await fetch(W_API,{method:'POST',body:fd});const d=await r.json();
+    if(!d.success)wShowToast('Error: '+d.error);else wLast=Math.floor(Date.now()/1000)-1;
+  }catch(e){wShowToast('Network error');}
+  document.getElementById('wSendBtn').disabled=false;wTa.focus();
+}
+
+async function wPollFn(){
+  try{
+    const r=await fetch(`${W_API}?action=get&session=${wSID}&since=${wLast}`);
+    const d=await r.json();if(!d.success||!d.messages.length)return;
+    d.messages.forEach(m=>{
+      if(m.direction==='outgoing'){wIds.add(m.id);return;}
+      if(!wIds.has(m.id)){wIds.add(m.id);wAppend(m);wLast=Math.max(wLast,m.timestamp);}
+    });
+    if(d.unread>0)setTimeout(wMarkRead,1500);
+    if(!wOpen)document.getElementById('wNotif').style.display='block';
+  }catch(e){}
+}
+
+async function wMarkRead(){
+  const fd=new FormData();fd.append('action','mark_read');fd.append('session',wSID);
+  await fetch(W_API,{method:'POST',body:fd});
+}
+
+function wAppend(m){
+  const msgs=document.getElementById('wMsgs');
+  const empty=document.getElementById('wEmpty');if(empty)empty.remove();
+  const typing=document.getElementById('wTyping');
+  const time=new Date(m.timestamp*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  const div=document.createElement('div');
+  div.className=`w-msg ${m.direction==='outgoing'?'out':'inc'}`;div.dataset.id=m.id;
+  const sl=m.direction==='incoming'?`<div class="w-msender">🟢 Support</div>`:'';
+  let content='';
+  if(m.type==='image'&&m.image_url) content=`<img src="${m.image_url.startsWith('http')?m.image_url:'https://sharkcool.in/'+m.image_url}" onclick="window.open(this.src)" alt="image" loading="lazy">`;
+  else if(m.type==='voice'&&m.voice_url) content=`🎤 Voice<br><audio controls src="${m.voice_url.startsWith('http')?m.voice_url:'https://sharkcool.in/'+m.voice_url}"></audio>`;
+  else content=m.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  div.innerHTML=`${sl}<div class="w-mbub">${content}</div><div class="w-mtime">${time}</div>`;
+  msgs.insertBefore(div,typing);
+  requestAnimationFrame(()=>{msgs.scrollTop=msgs.scrollHeight;});
+}
+
+async function wSendImg(input){
+  const file=input.files[0];if(!file||!wSID)return;input.value='';
+  const reader=new FileReader();
+  reader.onload=e=>wAppend({id:'tmp_img_'+Date.now(),text:'',type:'image',image_url:e.target.result,direction:'outgoing',timestamp:Math.floor(Date.now()/1000)});
+  reader.readAsDataURL(file);
+  const fd=new FormData();fd.append('action','send_image');fd.append('image',file);fd.append('session',wSID);fd.append('name',wName);fd.append('phone',wPhone);
+  try{const r=await fetch(W_API,{method:'POST',body:fd});const d=await r.json();if(!d.success)wShowToast('Image error: '+d.error);}catch(e){wShowToast('Network error');}
+}
+
+let wMR=null,wChunks=[],wRec=false;
+async function wRecStart(){
+  if(wRec)return;
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    wChunks=[];wRec=true;wMR=new MediaRecorder(stream);
+    wMR.ondataavailable=e=>{if(e.data.size>0)wChunks.push(e.data);};
+    wMR.start();
+    document.getElementById('wVoiceBtn').classList.add('recording');
+    document.getElementById('wHint').textContent='🔴 Recording... release to send';
+  }catch(e){wShowToast('Mic access denied!');}
+}
+async function wRecStop(){
+  if(!wMR||!wRec||wMR.state==='inactive')return;
+  wRec=false;
+  document.getElementById('wVoiceBtn').classList.remove('recording');
+  document.getElementById('wHint').textContent='Enter to send · Hold 🎤 to record';
+  wMR.onstop=async()=>{
+    const blob=new Blob(wChunks,{type:'audio/ogg; codecs=opus'});wChunks=[];
+    if(blob.size<500)return;
+    const url=URL.createObjectURL(blob);const tid='tmp_v_'+Date.now();wIds.add(tid);
+    wAppend({id:tid,text:'',type:'voice',voice_url:url,direction:'outgoing',timestamp:Math.floor(Date.now()/1000)});
+    const fd=new FormData();fd.append('action','send_voice');fd.append('voice',blob,'voice.ogg');fd.append('session',wSID);fd.append('name',wName);fd.append('phone',wPhone);
+    try{const r=await fetch(W_API,{method:'POST',body:fd});const d=await r.json();if(!d.success)wShowToast('Voice error: '+d.error);}catch(e){wShowToast('Network error');}
+    wMR.stream.getTracks().forEach(t=>t.stop());wMR=null;
+  };
+  wMR.stop();
+}
+
+function wShowToast(msg){
+  const t=document.getElementById('wToast');t.textContent=msg;t.className='w-toast error show';
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+async function wInit(){
+  try{
+    const r=await fetch(`${W_API}?action=get&session=${wSID}&since=0`);
+    const d=await r.json();
+    if(d.success&&d.messages.length){
+      d.messages.sort((a,b)=>a.timestamp-b.timestamp);
+      d.messages.forEach(m=>{wIds.add(m.id);wAppend(m);});
+      wLast=Math.max(...d.messages.map(m=>m.timestamp));
+    }
+  }catch(e){}
+  wPoll=setInterval(wPollFn,2000);
+}
+</script>
+<!-- ── END CHAT WIDGET ─────────────────────────────────── -->
+
 </body>
-<!-- v2 --></html>
+</html>
