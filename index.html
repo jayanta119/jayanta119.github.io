@@ -474,7 +474,8 @@ async function wSend(){
 
 async function wPollFn(){
   try{
-    const r=await fetch(`${W_API}?action=get&session=${wSID}&since=${wLast}`);
+    const fd=new FormData();fd.append('action','get');fd.append('session',wSID);fd.append('since',wLast);
+    const r=await fetch(W_API,{method:'POST',body:fd});
     const d=await r.json();if(!d.success||!d.messages.length)return;
     d.messages.forEach(m=>{
       if(m.direction==='outgoing'){wIds.add(m.id);return;}
@@ -552,7 +553,8 @@ function wShowToast(msg){
 
 async function wInit(){
   try{
-    const r=await fetch(`${W_API}?action=get&session=${wSID}&since=0`);
+    const fd=new FormData();fd.append('action','get');fd.append('session',wSID);fd.append('since',0);
+    const r=await fetch(W_API,{method:'POST',body:fd});
     const d=await r.json();
     if(d.success&&d.messages.length){
       d.messages.sort((a,b)=>a.timestamp-b.timestamp);
