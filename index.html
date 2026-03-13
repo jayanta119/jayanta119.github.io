@@ -334,5 +334,177 @@ const obs=new IntersectionObserver(entries=>{
 },{threshold:.1});
 document.querySelectorAll('.r').forEach(el=>obs.observe(el));
 </script>
+
+
+<!-- TELEGRAM LIVE CHAT WIDGET -->
+<style>
+#sc-fab{position:fixed;bottom:28px;right:28px;width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,#1da1f2,#667eea);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:9999;box-shadow:0 6px 28px rgba(29,161,242,.45);border:none;outline:none;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+#sc-fab:hover{transform:scale(1.1)}#sc-fab:active{transform:scale(.92)}
+#sc-fab::before{content:'';position:absolute;width:100%;height:100%;border-radius:50%;background:rgba(29,161,242,.3);animation:scpulse 2.2s ease-out infinite}
+@keyframes scpulse{0%{transform:scale(1);opacity:.8}70%,100%{transform:scale(1.6);opacity:0}}
+.sc-fi{width:26px;height:26px;fill:white;position:absolute;transition:opacity .2s,transform .2s}
+.sc-fi.sch{opacity:0;transform:rotate(45deg) scale(.5)}.sc-fi.scv{opacity:1;transform:none}
+.sc-nd{position:absolute;top:4px;right:4px;width:14px;height:14px;background:#ff4757;border-radius:50%;border:2px solid white;display:none}
+#sc-panel{position:fixed;bottom:104px;right:28px;width:380px;max-width:calc(100vw - 40px);height:560px;max-height:calc(100vh - 140px);background:#f7f9fc;border:1px solid #e2e8f0;border-radius:20px;z-index:9998;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.12);transform:scale(.85) translateY(20px);transform-origin:bottom right;opacity:0;pointer-events:none;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .25s}
+#sc-panel.scopen{transform:scale(1) translateY(0);opacity:1;pointer-events:all}
+.sc-intro{position:absolute;inset:0;z-index:50;background:#f7f9fc;display:flex;align-items:center;justify-content:center;padding:20px}
+.sc-card{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:28px 24px;width:100%;position:relative}
+.sc-card::before{content:'';position:absolute;top:0;left:30px;right:30px;height:1px;background:linear-gradient(90deg,transparent,#1da1f2,#667eea,transparent)}
+.sc-card h2{font-size:18px;font-weight:800;background:linear-gradient(135deg,#1da1f2,#667eea);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;font-family:'Bebas Neue',sans-serif;letter-spacing:.05em}
+.sc-card p{font-family:'DM Mono',monospace;font-size:11px;color:#94a3b8;margin-bottom:20px;line-height:1.6}
+.sc-fl{margin-bottom:12px}.sc-fl label{display:block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#94a3b8;margin-bottom:5px}
+.sc-fl input{width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;color:#1e293b;font-family:'DM Mono',monospace;font-size:15px;outline:none;transition:border-color .2s}
+.sc-fl input:focus{border-color:rgba(29,161,242,.5);box-shadow:0 0 0 3px rgba(29,161,242,.08)}
+.sc-fl input::placeholder{color:#cbd5e1}
+.sc-sbtn{width:100%;padding:14px;margin-top:6px;background:linear-gradient(135deg,#1da1f2,#667eea);border:none;border-radius:12px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.08em;cursor:pointer;min-height:48px}
+.sc-sbtn:active{transform:scale(.97)}
+.sc-hdr{position:relative;z-index:10;background:#fff;border-bottom:1px solid #e2e8f0;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.sc-hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#1da1f2,#667eea,transparent);opacity:.4}
+.sc-avt{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#1da1f2,#667eea);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;position:relative}
+.sc-od{position:absolute;bottom:1px;right:1px;width:9px;height:9px;border-radius:50%;background:#22c55e;border:2px solid #fff}
+.sc-inf{flex:1;min-width:0}
+.sc-inf h3{font-size:14px;font-weight:800;background:linear-gradient(135deg,#1da1f2,#667eea);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-family:'Bebas Neue',sans-serif;letter-spacing:.05em}
+.sc-sub{font-family:'DM Mono',monospace;font-size:10px;color:#94a3b8;margin-top:1px}
+.sc-tag{font-family:'DM Mono',monospace;font-size:9px;color:#94a3b8;background:#f0f4f8;border:1px solid #e2e8f0;border-radius:6px;padding:3px 7px;flex-shrink:0}
+.sc-cb{width:34px;height:34px;border-radius:50%;background:#f0f4f8;border:1px solid #e2e8f0;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:15px;flex-shrink:0}
+.sc-mw{flex:1;overflow:hidden;position:relative;z-index:1}
+.sc-msgs{height:100%;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth}
+.sc-msgs::-webkit-scrollbar{width:3px}.sc-msgs::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:4px}
+.sc-msg{display:flex;flex-direction:column;max-width:82%;animation:scmi .25s cubic-bezier(.16,1,.3,1) forwards;opacity:0;transform:translateY(8px)}
+@keyframes scmi{to{opacity:1;transform:translateY(0)}}
+.sc-msg.sco{align-self:flex-end;align-items:flex-end}.sc-msg.sci{align-self:flex-start;align-items:flex-start}
+.sc-snd{font-family:'DM Mono',monospace;font-size:9px;color:#94a3b8;margin-bottom:3px}
+.sc-bub{padding:10px 14px;border-radius:18px;font-size:13px;line-height:1.55;word-break:break-word;font-family:'DM Mono',monospace}
+.sc-msg.sco .sc-bub{background:linear-gradient(135deg,#1da1f2,#667eea);border-bottom-right-radius:4px;color:#fff}
+.sc-msg.sci .sc-bub{background:#f0f4f8;border:1px solid #e2e8f0;border-bottom-left-radius:4px;color:#1e293b}
+.sc-tm{font-family:'DM Mono',monospace;font-size:9px;color:#94a3b8;margin-top:3px}
+.sc-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#94a3b8}
+.sc-empty .sci{font-size:32px;opacity:.2}.sc-empty p{font-family:'DM Mono',monospace;font-size:11px}
+.sc-typ{display:none;align-self:flex-start;background:#f0f4f8;border:1px solid #e2e8f0;border-radius:16px;padding:11px 13px;gap:5px;align-items:center}
+.sc-typ.show{display:flex}
+.sc-typ span{width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:scb 1.2s infinite}
+.sc-typ span:nth-child(2){animation-delay:.2s}.sc-typ span:nth-child(3){animation-delay:.4s}
+@keyframes scb{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
+.sc-inp{position:relative;z-index:10;background:#fff;border-top:1px solid #e2e8f0;padding:10px 12px 12px;flex-shrink:0}
+.sc-row{display:flex;align-items:flex-end;gap:6px;background:#f0f4f8;border:1px solid #e2e8f0;border-radius:16px;padding:6px 6px 6px 14px}
+.sc-row:focus-within{border-color:rgba(29,161,242,.4);box-shadow:0 0 0 3px rgba(29,161,242,.06)}
+#sc-tin{flex:1;background:none;border:none;outline:none;color:#1e293b;font-family:'DM Mono',monospace;font-size:15px;line-height:1.5;resize:none;max-height:100px;min-height:26px;height:26px;padding:4px 0;overflow-y:auto}
+#sc-tin::placeholder{color:#94a3b8}
+.sc-send{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#1da1f2,#667eea);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sc-send:active{transform:scale(.9)}.sc-send:disabled{opacity:.4;cursor:not-allowed}
+.sc-send svg{width:17px;height:17px;fill:white}
+.sc-ib{width:40px;height:40px;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none}
+#sc-imgb{background:linear-gradient(135deg,#22c55e,#16a34a)}
+#sc-imgb svg{stroke:#fff;fill:none;width:18px;height:18px;stroke-width:2}
+#sc-voib{background:linear-gradient(135deg,#f97316,#ef4444)}
+#sc-voib svg{stroke:#fff;fill:none;width:18px;height:18px;stroke-width:2}
+.sc-ib.sc-rec{animation:screc .8s ease infinite}
+@keyframes screc{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.sc-hint{text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:#cbd5e1;margin-top:5px}
+.sc-toast{position:fixed;top:12px;left:50%;transform:translateX(-50%) translateY(-80px);background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 20px;font-family:'DM Mono',monospace;font-size:12px;z-index:99999;transition:transform .35s;white-space:nowrap;max-width:calc(100vw - 32px)}
+.sc-toast.show{transform:translateX(-50%) translateY(0)}.sc-toast.err{border-color:rgba(255,82,82,.4);color:#ef4444}
+@media(max-width:520px){
+  #sc-panel{position:fixed;inset:0;width:100%;height:100%;max-width:100%;max-height:100%;border-radius:0;border:none;transform:translateY(100%);transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .2s}
+  #sc-panel.scopen{transform:translateY(0)}
+  .sc-msg{max-width:88%}
+}
+</style>
+
+<button id="sc-fab" onclick="scTog()">
+  <svg class="sc-fi scv" id="sc-ico" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  <svg class="sc-fi sch" id="sc-icx" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg>
+  <span class="sc-nd" id="sc-nd"></span>
+</button>
+
+<div id="sc-panel">
+  <div class="sc-intro" id="sc-intro">
+    <div class="sc-card">
+      <div style="font-size:26px;margin-bottom:10px">&#128172;</div>
+      <h2>Chat Support</h2>
+      <p>Enter your name to connect instantly.</p>
+      <div class="sc-fl"><label>Your Name *</label><input type="text" id="sc-nm" placeholder="e.g. Rahul Sharma" maxlength="40" autocomplete="name"/></div>
+      <div class="sc-fl"><label>Phone (optional)</label><input type="tel" id="sc-ph" placeholder="e.g. 98765 43210" maxlength="15" inputmode="tel"/></div>
+      <button class="sc-sbtn" onclick="scStart()">Start Chat &#8594;</button>
+    </div>
+  </div>
+  <div class="sc-hdr">
+    <div class="sc-avt">&#128172;<div class="sc-od"></div></div>
+    <div class="sc-inf"><h3>Live Support</h3><div class="sc-sub" id="sc-sub">Connecting...</div></div>
+    <div class="sc-tag" id="sc-tag"></div>
+    <button class="sc-cb" onclick="scTog()">&#x2715;</button>
+  </div>
+  <div class="sc-mw"><div class="sc-msgs" id="sc-msgs">
+    <div class="sc-empty" id="sc-empty"><div style="font-size:32px;opacity:.2">&#128172;</div><p>Send a message to get started!</p></div>
+    <div class="sc-typ" id="sc-typ"><span></span><span></span><span></span></div>
+  </div></div>
+  <div class="sc-inp">
+    <div class="sc-row">
+      <input type="file" id="sc-imgi" accept="image/*" style="display:none" onchange="scSendImg(this)">
+      <button class="sc-ib" id="sc-imgb" onclick="document.getElementById('sc-imgi').click()">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </button>
+      <button class="sc-ib" id="sc-voib">
+        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
+      <textarea id="sc-tin" placeholder="Type a message..." rows="1" autocomplete="off"></textarea>
+      <button class="sc-send" id="sc-sndb" onclick="scSend()">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <div class="sc-hint" id="sc-hint">Enter to send &middot; Hold &#127908; to record</div>
+  </div>
+</div>
+<div class="sc-toast" id="sc-toast"></div>
+
+<script>
+(function(){
+const API='https://sharkcool.in/tg-messages-api.php';
+let S='',N='',P='',L=0,IDs=new Set(),poll,open=false,mr=null,ac=[],rec=false;
+const isMob=()=>window.innerWidth<=520;
+
+function scTog(){open=!open;document.getElementById('sc-panel').classList.toggle('scopen',open);document.getElementById('sc-ico').classList.toggle('scv',!open);document.getElementById('sc-ico').classList.toggle('sch',open);document.getElementById('sc-icx').classList.toggle('scv',open);document.getElementById('sc-icx').classList.toggle('sch',!open);if(open){document.getElementById('sc-nd').style.display='none';setTimeout(()=>{const e=document.querySelector('#sc-intro input,#sc-tin');if(e)e.focus();},380);}}
+window.scTog=scTog;
+
+function scStart(){const n=document.getElementById('sc-nm').value.trim();if(!n){document.getElementById('sc-nm').style.borderColor='#ef4444';setTimeout(()=>document.getElementById('sc-nm').style.borderColor='',1200);return;}N=n;P=document.getElementById('sc-ph').value.trim();S=localStorage.getItem('sc_sid')||Math.random().toString(36).substr(2,6).toUpperCase();localStorage.setItem('sc_sid',S);localStorage.setItem('sc_name',N);document.getElementById('sc-intro').style.display='none';document.getElementById('sc-sub').innerHTML='<span style="color:#22c55e">\u25cf</span> Online \u00b7 '+N;document.getElementById('sc-tag').textContent='#'+S;scInit();setTimeout(()=>document.getElementById('sc-tin').focus(),300);}
+window.scStart=scStart;
+
+window.addEventListener('load',function(){
+  const s=localStorage.getItem('sc_sid'),n=localStorage.getItem('sc_name');
+  if(s&&n){S=s;N=n;P=localStorage.getItem('sc_phone')||'';document.getElementById('sc-intro').style.display='none';document.getElementById('sc-sub').innerHTML='<span style="color:#22c55e">\u25cf</span> Online \u00b7 '+N;document.getElementById('sc-tag').textContent='#'+S;scInit();}
+  document.getElementById('sc-nm').addEventListener('keydown',function(e){if(e.key==='Enter')scStart();});
+  document.getElementById('sc-ph').addEventListener('keydown',function(e){if(e.key==='Enter')scStart();});
+  setTimeout(function(){if(!open)document.getElementById('sc-nd').style.display='block';},3500);
+  var ti=document.getElementById('sc-tin');
+  ti.addEventListener('input',function(){ti.style.height='auto';ti.style.height=Math.min(ti.scrollHeight,100)+'px';});
+  ti.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey&&!isMob()){e.preventDefault();scSend();}});
+  var vb=document.getElementById('sc-voib');
+  vb.addEventListener('mousedown',function(e){e.preventDefault();scStR();});
+  vb.addEventListener('mouseup',function(e){e.preventDefault();scSpR();});
+  vb.addEventListener('mouseleave',function(){if(rec)scSpR();});
+  vb.addEventListener('touchstart',function(e){e.preventDefault();scStR();},{passive:false});
+  vb.addEventListener('touchend',function(e){e.preventDefault();scSpR();},{passive:false});
+});
+
+function scSend(){var msg=document.getElementById('sc-tin').value.trim();if(!msg||!S)return;document.getElementById('sc-sndb').disabled=true;document.getElementById('sc-tin').value='';document.getElementById('sc-tin').style.height='auto';scApp({id:'t'+Date.now(),text:msg,direction:'outgoing',timestamp:Math.floor(Date.now()/1000)});var fd=new FormData();fd.append('action','send');fd.append('msg',msg);fd.append('session',S);fd.append('name',N);fd.append('phone',P);fetch(API,{method:'POST',body:fd}).then(function(){L=Math.floor(Date.now()/1000)-1;}).catch(function(){scTst('Network error');});document.getElementById('sc-sndb').disabled=false;}
+window.scSend=scSend;
+
+function scPoll(){fetch(API+'?action=get&session='+S+'&since='+L).then(function(r){return r.json();}).then(function(d){if(!d.success||!d.messages.length)return;d.messages.forEach(function(m){if(m.direction==='outgoing'){IDs.add(m.id);return;}if(!IDs.has(m.id)){IDs.add(m.id);scApp(m);L=Math.max(L,m.timestamp);}});if(!open)document.getElementById('sc-nd').style.display='block';}).catch(function(){});}
+
+function scApp(m){var ms=document.getElementById('sc-msgs');var em=document.getElementById('sc-empty');if(em)em.remove();var ty=document.getElementById('sc-typ');var tm=new Date(m.timestamp*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});var dv=document.createElement('div');dv.className='sc-msg '+(m.direction==='outgoing'?'sco':'sci');var sn=m.direction==='incoming'?'<div class="sc-snd">\ud83d\udfe2 Support</div>':'';var c='';if(m.type==='image'&&m.image_url){c='<img src="'+m.image_url+'" onclick="window.open(this.src)" loading="lazy" style="max-width:170px;border-radius:10px;display:block;margin-top:4px">';}else if(m.type==='voice'&&m.voice_url){c='\ud83c\udfa4 Voice<br><audio controls src="'+m.voice_url+'" style="width:150px;margin-top:4px"></audio>';}else{c=(m.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}dv.innerHTML=sn+'<div class="sc-bub">'+c+'</div><div class="sc-tm">'+tm+'</div>';ms.insertBefore(dv,ty);requestAnimationFrame(function(){ms.scrollTop=ms.scrollHeight;});}
+
+function scSendImg(inp){var f=inp.files[0];if(!f||!S)return;inp.value='';var rd=new FileReader();rd.onload=function(e){scApp({id:'ti'+Date.now(),type:'image',image_url:e.target.result,direction:'outgoing',timestamp:Math.floor(Date.now()/1000)});};rd.readAsDataURL(f);var fd=new FormData();fd.append('action','send_image');fd.append('image',f);fd.append('session',S);fd.append('name',N);fd.append('phone',P);fetch(API,{method:'POST',body:fd}).catch(function(){scTst('Upload error');});}
+window.scSendImg=scSendImg;
+
+function scStR(){if(rec)return;navigator.mediaDevices.getUserMedia({audio:true}).then(function(st){ac=[];rec=true;mr=new MediaRecorder(st);mr.ondataavailable=function(e){if(e.data.size>0)ac.push(e.data);};mr.start();document.getElementById('sc-voib').classList.add('sc-rec');document.getElementById('sc-hint').textContent='\ud83d\udd34 Recording... release to send';}).catch(function(){scTst('Mic access denied!');});}
+
+function scSpR(){if(!mr||!rec||mr.state==='inactive')return;rec=false;document.getElementById('sc-voib').classList.remove('sc-rec');document.getElementById('sc-hint').textContent='Enter to send \u00b7 Hold \ud83c\udfa4 to record';var sid=S;mr.onstop=function(){var bl=new Blob(ac,{type:'audio/ogg; codecs=opus'});ac=[];if(bl.size<500)return;scApp({id:'tv'+Date.now(),type:'voice',voice_url:URL.createObjectURL(bl),direction:'outgoing',timestamp:Math.floor(Date.now()/1000)});var fd=new FormData();fd.append('action','send_voice');fd.append('voice',bl,'voice.ogg');fd.append('session',sid);fd.append('name',N);fd.append('phone',P);fetch(API,{method:'POST',body:fd}).catch(function(){scTst('Upload error');});mr.stream.getTracks().forEach(function(t){t.stop();});mr=null;};mr.stop();}
+
+function scTst(msg){var t=document.getElementById('sc-toast');t.textContent=msg;t.className='sc-toast err show';setTimeout(function(){t.classList.remove('show');},3000);}
+
+function scInit(){fetch(API+'?action=get&session='+S+'&since=0').then(function(r){return r.json();}).then(function(d){if(d.success&&d.messages.length){d.messages.sort(function(a,b){return a.timestamp-b.timestamp;});d.messages.forEach(function(m){IDs.add(m.id);scApp(m);});L=Math.max.apply(null,d.messages.map(function(m){return m.timestamp;}));}}).catch(function(){});poll=setInterval(scPoll,2000);}
+})();
+</script>
+<!-- END CHAT WIDGET -->
+
 </body>
 </html>
